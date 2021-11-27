@@ -71,18 +71,103 @@ app.post("/api/series", (req, res) => {
   res.json(newSeries);
 });
 
-app.delete("/api/series/:seriesId", (req, res) => {
-  const { seriesId } = req.params;
-  series = series.filter((s) => s.id !== seriesId);
-  res.sendStatus(200);
-});
-
 app.put("/api/series/:seriesId", (req, res) => {
   const { seriesId } = req.params;
   const { title, showChapterButtons } = req.body;
   series = series.map((s) =>
     s.id !== seriesId ? s : { ...s, title, showChapterButtons }
   );
+  res.sendStatus(200);
+});
+
+app.delete("/api/series/:seriesId", (req, res) => {
+  const { seriesId } = req.params;
+  series = series.filter((s) => s.id !== seriesId);
+  res.sendStatus(200);
+});
+
+app.post("/api/chapters", (req, res) => {
+  let { newChapter, seriesId } = req.body;
+  let chapterId = generateId();
+
+  newChapter = { ...newChapter, id: chapterId, articles: [] };
+  let targetSeries = series.find((s) => s.id === seriesId);
+  targetSeries.chapters.push(chapterId);
+  chapters.push(newChapter);
+
+  res.json(newChapter);
+});
+
+app.put("/api/chapters/:chapterId", (req, res) => {
+  const { chapterId } = req.params;
+  const { title } = req.body;
+  chapters = chapters.map((c) => (c.id !== chapterId ? c : { ...c, title }));
+  res.sendStatus(200);
+});
+
+// For deletion
+app.post("/api/chapters/:chapterId", (req, res) => {
+  let { seriesId } = req.body;
+  let { chapterId } = req.params;
+
+  let targetSeries = series.find((s) => s.id === seriesId);
+  targetSeries.chapters = targetSeries.chapters.filter(
+    (cid) => cid !== chapterId
+  );
+
+  chapters = chapters.filter((c) => c.id !== chapterId);
+
+  res.sendStatus(200);
+});
+
+app.post("/api/articles", (req, res) => {
+  let {
+    newArticle: { title, date, content },
+    chapterId,
+  } = req.body;
+  let articleId = generateId();
+
+  const path = `temp/${articleId}.json`;
+  fs.writeFileSync(
+    `${BASE_ARTICLE_PATH}/${path}`,
+    JSON.stringify({ coverImage: "default-cover.jpg", date, title, content })
+  );
+
+  let targetChapter = chapters.find((c) => c.id === chapterId);
+  targetChapter.articles.push(articleId);
+  articles.push({ id: articleId, path });
+
+  res.json({ articleId });
+});
+
+app.put("/api/articles/:articleId", (req, res) => {
+  const { articleId } = req.params;
+  const { title, date, content } = req.body;
+
+  const { path } = articles.find((a) => a.id === articleId);
+  const rawData = fs.readFileSync(`${BASE_ARTICLE_PATH}/${path}`);
+  const articleObj = JSON.parse(rawData);
+
+  fs.writeFileSync(
+    `${BASE_ARTICLE_PATH}/${path}`,
+    JSON.stringify({ ...articleObj, title, date, content })
+  );
+
+  res.sendStatus(200);
+});
+
+// For deletion
+app.post("/api/articles/:articleId", (req, res) => {
+  let { chapterId } = req.body;
+  let { articleId } = req.params;
+
+  let targetChapter = chapters.find((c) => c.id === chapterId);
+  targetChapter.articles = targetChapter.articles.filter(
+    (aid) => aid !== articleId
+  );
+
+  articles = articles.filter((a) => a.id !== articleId);
+
   res.sendStatus(200);
 });
 
