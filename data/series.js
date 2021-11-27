@@ -34,7 +34,7 @@ module.exports = [
       {
         id: 0,
         title: "短篇小說",
-        path: "short-story",
+        path: "short-story/chapter-1",
         articleNum: 7,
       },
     ],
@@ -48,7 +48,7 @@ module.exports = [
       {
         id: 0,
         title: "極短篇小說",
-        path: "flash-fiction",
+        path: "flash-fiction/chapter-1",
         articleNum: 14,
       },
     ],
@@ -62,7 +62,7 @@ module.exports = [
       {
         id: 0,
         title: "七號圖書館",
-        path: "library-seven",
+        path: "library-seven/chapter-1",
         articleNum: 3,
       },
     ],
