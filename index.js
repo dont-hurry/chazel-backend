@@ -1,9 +1,9 @@
 const express = require("express");
 const cors = require("cors");
-const { getCurrentTimeString } = require("./utils");
-const series = require("./data/series");
-const chapters = require("./data/chapters");
-const articles = require("./data/articles");
+const { getCurrentTimeString, generateId } = require("./utils");
+let series = require("./data/series");
+let chapters = require("./data/chapters");
+let articles = require("./data/articles");
 const fs = require("fs");
 
 const BASE_ARTICLE_PATH = "data/articles";
@@ -14,7 +14,12 @@ app.use(cors());
 app.use(express.json());
 
 const requestLogger = (req, res, next) => {
-  let logElements = [getCurrentTimeString(), req.method, req.path];
+  let logElements = [
+    getCurrentTimeString(),
+    req.method,
+    req.path,
+    JSON.stringify(req.body),
+  ];
   console.log(logElements.join(" "));
   next();
 };
@@ -57,8 +62,28 @@ app.get("/api/sibling-articles/:targetArticleId", (req, res) => {
 });
 
 app.post("/api/series", (req, res) => {
-  console.log(req.body);
-  res.json({ foo: "bar" });
+  const id = generateId();
+  const { title, showChapterButtons } = req.body;
+
+  const newSeries = { id, title, anchor: id, showChapterButtons, chapters: [] };
+  series.push(newSeries);
+
+  res.json(newSeries);
+});
+
+app.delete("/api/series/:seriesId", (req, res) => {
+  const { seriesId } = req.params;
+  series = series.filter((s) => s.id !== seriesId);
+  res.sendStatus(200);
+});
+
+app.put("/api/series/:seriesId", (req, res) => {
+  const { seriesId } = req.params;
+  const { title, showChapterButtons } = req.body;
+  series = series.map((s) =>
+    s.id !== seriesId ? s : { ...s, title, showChapterButtons }
+  );
+  res.sendStatus(200);
 });
 
 app.listen(PORT, () => {
