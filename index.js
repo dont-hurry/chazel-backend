@@ -5,14 +5,11 @@ const series = require("./data/series");
 const fs = require("fs");
 
 const BASE_ARTICLE_PATH = "data/articles";
+const PORT = process.env.PORT || 3001;
 
 const app = express();
 
-const corsOptions = {
-  origin: "http://localhost:3000",
-};
-
-app.use(cors(corsOptions));
+app.use(cors());
 
 const requestLogger = (req, res, next) => {
   let logElements = [getCurrentTimeString(), req.method, req.path];
@@ -42,7 +39,6 @@ app.get("/api/articles/:series/:articleId", (req, res) => {
   res.json(JSON.parse(rawData));
 });
 
-const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Server listening at port ${PORT}`);
 });
