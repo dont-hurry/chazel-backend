@@ -1,0 +1,49 @@
+@TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIiwiaWF0IjoxNjM4MTIzMjI4fQ.Ok66pPh0Hl_ZF21xFTDmykUiMF8fvrxq7V55bO5uD3c
+# "迴路" (under the chapter "短篇小說")
+@TARGET_ARTICLE_ID = 0sqrjf7ciffy
+# "短篇小說"
+@NEW_ARTICLE_CHAPTER_ID = gmb1v7ue0bod
+# "迴路" (under the chapter "短篇小說")
+@ARTICLE_ID_FOR_DELETION = 0sqrjf7ciffy
+"短篇小說"
+@CHAPTER_ID_FOR_DELETION = gmb1v7ue0bod
+
+###
+GET http://localhost:3001/api/articles/{{TARGET_ARTICLE_ID}}
+
+###
+GET http://localhost:3001/api/sibling-articles/{{TARGET_ARTICLE_ID}}
+
+### Create a new article under the chapter "短篇小說"
+POST http://localhost:3001/api/articles
+Authorization: bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+  "newArticle": {
+    "title": "NEW ARTICLE TITLE",
+    "date": "NEW ARTICLE DATE",
+    "content": "NEW ARTICLE CONTENT"
+  },
+  "chapterId": "{{NEW_ARTICLE_CHAPTER_ID}}"
+}
+
+### Modify the article "迴路" (under the chapter "短篇小說")
+PUT http://localhost:3001/api/articles/{{TARGET_ARTICLE_ID}}
+Authorization: bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+  "title": "MODIFIED ARTICLE TITLE",
+  "date": "MODIFIED ARTICLE DATE",
+  "content": "MODIFIED ARTICLE CONTENT"
+}
+
+### Delete the article "迴路" (under the chapter "短篇小說")
+POST http://localhost:3001/api/articles/{{ARTICLE_ID_FOR_DELETION}}
+Authorization: bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+  "chapterId": "{{CHAPTER_ID_FOR_DELETION}}"
+}

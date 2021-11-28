@@ -3,7 +3,9 @@ let chapters = require("../data/chapters");
 let articles = require("../data/articles");
 const fs = require("fs");
 const BASE_ARTICLE_PATH = "data/articles";
-const { generateId } = require("../utils");
+const { extractTokenFromRequest, generateId } = require("../utils");
+const jwt = require("jsonwebtoken");
+const { SECRET } = require("../constants");
 
 const router = express.Router();
 
@@ -35,54 +37,87 @@ router.get("/api/sibling-articles/:targetArticleId", (req, res) => {
 });
 
 router.post("/api/articles", (req, res) => {
-  let {
-    newArticle: { title, date, content },
-    chapterId,
-  } = req.body;
-  let articleId = generateId();
+  try {
+    const token = extractTokenFromRequest(req);
+    const decodedToken = jwt.verify(token, SECRET);
+    if (!token || !decodedToken) {
+      return res.status(401).json({ errorMessage: "invalid token" });
+    }
 
-  const path = `temp/${articleId}.json`;
-  fs.writeFileSync(
-    `${BASE_ARTICLE_PATH}/${path}`,
-    JSON.stringify({ coverImage: "default-cover.jpg", date, title, content })
-  );
+    let {
+      newArticle: { title, date, content },
+      chapterId,
+    } = req.body;
+    let articleId = generateId();
 
-  let targetChapter = chapters.find((c) => c.id === chapterId);
-  targetChapter.articles.push(articleId);
-  articles.push({ id: articleId, path });
+    const path = `temp/${articleId}.json`;
+    fs.writeFileSync(
+      `${BASE_ARTICLE_PATH}/${path}`,
+      JSON.stringify({ coverImage: "default-cover.jpg", date, title, content })
+    );
 
-  res.json({ articleId });
+    let targetChapter = chapters.find((c) => c.id === chapterId);
+    targetChapter.articles.push(articleId);
+    articles.push({ id: articleId, path });
+
+    res.json({ articleId });
+  } catch (error) {
+    console.error(error);
+    return res.status(401).json({ errorMessage: "Server-side error" });
+  }
 });
 
 router.put("/api/articles/:articleId", (req, res) => {
-  const { articleId } = req.params;
-  const { title, date, content } = req.body;
+  try {
+    const token = extractTokenFromRequest(req);
+    const decodedToken = jwt.verify(token, SECRET);
+    if (!token || !decodedToken) {
+      return res.status(401).json({ errorMessage: "invalid token" });
+    }
 
-  const { path } = articles.find((a) => a.id === articleId);
-  const rawData = fs.readFileSync(`${BASE_ARTICLE_PATH}/${path}`);
-  const articleObj = JSON.parse(rawData);
+    const { articleId } = req.params;
+    const { title, date, content } = req.body;
 
-  fs.writeFileSync(
-    `${BASE_ARTICLE_PATH}/${path}`,
-    JSON.stringify({ ...articleObj, title, date, content })
-  );
+    const { path } = articles.find((a) => a.id === articleId);
+    const rawData = fs.readFileSync(`${BASE_ARTICLE_PATH}/${path}`);
+    const articleObj = JSON.parse(rawData);
 
-  res.sendStatus(200);
+    fs.writeFileSync(
+      `${BASE_ARTICLE_PATH}/${path}`,
+      JSON.stringify({ ...articleObj, title, date, content })
+    );
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.error(error);
+    return res.status(401).json({ errorMessage: "Server-side error" });
+  }
 });
 
 // For deletion
 router.post("/api/articles/:articleId", (req, res) => {
-  let { chapterId } = req.body;
-  let { articleId } = req.params;
+  try {
+    const token = extractTokenFromRequest(req);
+    const decodedToken = jwt.verify(token, SECRET);
+    if (!token || !decodedToken) {
+      return res.status(401).json({ errorMessage: "invalid token" });
+    }
 
-  let targetChapter = chapters.find((c) => c.id === chapterId);
-  targetChapter.articles = targetChapter.articles.filter(
-    (aid) => aid !== articleId
-  );
+    let { chapterId } = req.body;
+    let { articleId } = req.params;
 
-  articles = articles.filter((a) => a.id !== articleId);
+    let targetChapter = chapters.find((c) => c.id === chapterId);
+    targetChapter.articles = targetChapter.articles.filter(
+      (aid) => aid !== articleId
+    );
 
-  res.sendStatus(200);
+    articles = articles.filter((a) => a.id !== articleId);
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.error(error);
+    return res.status(401).json({ errorMessage: "Server-side error" });
+  }
 });
 
 function getArticleById(articleId) {

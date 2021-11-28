@@ -1,0 +1,40 @@
+@TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIiwiaWF0IjoxNjM4MTIzMjI4fQ.Ok66pPh0Hl_ZF21xFTDmykUiMF8fvrxq7V55bO5uD3c
+# "長篇小說 - 泣城"
+@NEW_CHAPTER_SERIES_ID = gmxx8e0qxh88
+# "三、牧與獵之章"
+@TARGET_CHAPTER_ID = rzissss2hdjx
+# "長篇小說 - 泣城"
+@SERIES_ID_FOR_DELETION = gmxx8e0qxh88
+
+###
+GET http://localhost:3001/api/chapters
+
+### Create a new chapter under the series "長篇小說 - 泣城"
+POST http://localhost:3001/api/chapters
+Authorization: bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+  "newChapter": {
+    "title": "NEW CHAPTER TITLE"
+  },
+  "seriesId": "{{NEW_CHAPTER_SERIES_ID}}"
+}
+
+### Modify the chapter "三、牧與獵之章"
+PUT http://localhost:3001/api/chapters/{{TARGET_CHAPTER_ID}}
+Authorization: bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+  "title": "MODIFIED CHAPTER TITLE"
+}
+
+### Delete the chapter "三、牧與獵之章" (under the series "長篇小說 - 泣城")
+POST http://localhost:3001/api/chapters/{{TARGET_CHAPTER_ID}}
+Authorization: bearer {{TOKEN}}
+Content-Type: application/json
+
+{
+  "seriesId": "{{SERIES_ID_FOR_DELETION}}"
+}

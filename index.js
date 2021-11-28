@@ -4,6 +4,7 @@ const { getCurrentTimeString } = require("./utils");
 const seriesRouter = require("./routers/series");
 const chaptersRouter = require("./routers/chapters");
 const articlesRouter = require("./routers/articles");
+const usersRouter = require("./routers/users");
 
 const PORT = process.env.PORT || 3001;
 
@@ -27,6 +28,7 @@ app.use(requestLogger);
 app.use("/", seriesRouter);
 app.use("/", chaptersRouter);
 app.use("/", articlesRouter);
+app.use("/", usersRouter);
 
 app.listen(PORT, () => {
   console.log(`Server listening at port ${PORT}`);

@@ -1,5 +1,0 @@
-### Get an article (with a specific chapter)
-GET http://localhost:3001/api/novel/chapter-2/2
-
-### Get an article (without a specific chapter)
-GET http://localhost:3001/api/articles/library-seven/2

@@ -1,3 +1,14 @@
+function extractTokenFromRequest(request) {
+  const authorization = request.get("authorization");
+  console.log(authorization)
+
+  if (authorization && authorization.toLowerCase().startsWith("bearer")) {
+    return authorization.substring(7);
+  }
+
+  return null;
+}
+
 function getCurrentTimeString() {
   const date = new Date();
   const joinedString = [date.getHours(), date.getMinutes(), date.getSeconds()]
@@ -25,6 +36,7 @@ function generateId() {
 }
 
 module.exports = {
+  extractTokenFromRequest,
   getCurrentTimeString,
   generateId,
 };
