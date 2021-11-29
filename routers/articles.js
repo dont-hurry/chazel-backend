@@ -123,7 +123,18 @@ router.post("/api/articles/:articleId", (req, res) => {
 function getArticleById(articleId) {
   const { path } = articles.find((article) => article.id === articleId);
   let rawData = fs.readFileSync(`${BASE_ARTICLE_PATH}/${path}`);
-  return { ...JSON.parse(rawData), articleId };
+
+  let returnedArticle = { ...JSON.parse(rawData), articleId };
+  replaceCoverImage(returnedArticle, (oldCoverImage) => {
+    return oldCoverImage.replace(/\.jpe?g|\.png/g, ".webp");
+  });
+
+  return returnedArticle;
+}
+
+function replaceCoverImage(targetArticle, callback) {
+  const newCoverImage = callback(targetArticle.coverImage);
+  targetArticle.coverImage = newCoverImage;
 }
 
 module.exports = router;
